@@ -20,9 +20,9 @@ StickySpammer.ExplosionDistance = StickySpammer.Menu:AddComponent(Menu.Slider("E
 StickySpammer.DoAutoDetonate = StickySpammer.Menu:AddComponent(Menu.Checkbox("Auto detonate", StickySpammer.DoAutoDetonate, ItemFlags.FullWidth))
 StickySpammer.Rage = StickySpammer.Menu:AddComponent(Menu.Checkbox("Rage (no visibility check)", StickySpammer.Rage, ItemFlags.FullWidth))
 StickySpammer.Key = StickySpammer.Menu:AddComponent(Menu.Keybind("keybind", StickySpammer.Key))
-StickySpammer.Menu:AddComponent(Menu.Button("save config", function() 
-	print("this doesn't exist, we cant write to disk apparently.")
-end))
+--StickySpammer.Menu:AddComponent(Menu.Button("save config", function() 
+--	print("this doesn't exist, we cant write to disk apparently.")
+--end))
 
 
 
