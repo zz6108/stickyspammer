@@ -160,19 +160,20 @@ function StickySpammer.autoDetonate(cmd)
 
 
 	local myBombs = StickySpammer.stickies(me)
-
 	local players = entities.FindByClass("CTFPlayer")
 
-	if #myBombs > 0 then
-		for _, player in pairs(players) do
-			if player and player:IsAlive() and player:GetTeamNumber() ~= me:GetTeamNumber() then
-				if StickySpammer.Rage.Value or (StickySpammer.visible(player, me)) then
-					if gui.GetValue("ignore cloaked") == 1 and not player:InCond(4) then
-						for _, bomb in pairs(myBombs) do
-							if (bomb:GetAbsOrigin() - player:GetAbsOrigin()):Length() < StickySpammer.ExplosionDistance.Value then 
-								if StickySpammer.visible(player, bomb, true) then
-									cmd:SetButtons(cmd:GetButtons() | IN_ATTACK2) --detonateyy
-								end
+	if #myBombs < 1 or #players < 1 then return end
+
+
+
+	for _, player in pairs(players) do
+		if player and player:IsAlive() and player:GetTeamNumber() ~= me:GetTeamNumber() then -- verify that it's the enemy and alive..
+			if StickySpammer.Rage.Value or (StickySpammer.visible(player, me)) then -- rage / visibility check
+				if gui.GetValue("ignore cloaked") == 1 and not player:InCond(4) then -- spy cloak check
+					for _, bomb in pairs(myBombs) do
+						if (bomb:GetAbsOrigin() - player:GetAbsOrigin()):Length() < StickySpammer.ExplosionDistance.Value then -- check distance
+							if StickySpammer.visible(player, bomb, true) then -- ensure that sticky can actually affect the target..
+								cmd:SetButtons(cmd:GetButtons() | IN_ATTACK2) --detonatey
 							end
 						end
 					end
@@ -190,11 +191,13 @@ function StickySpammer.spam(cmd)
 	if not me or not me:IsAlive() then return end
 		
 	local weapon = me:GetPropEntity("m_hActiveWeapon")
-	if StickySpammer.Key and StickySpammer.Key:GetValue() ~= KEY_NONE and weapon and weapon:GetWeaponID() == TF_WEAPON_PIPEBOMBLAUNCHER and input.IsButtonDown(StickySpammer.Key:GetValue()) then
+	if StickySpammer.Key and StickySpammer.Key:GetValue() ~= KEY_NONE and
+		weapon and weapon:GetWeaponID() == TF_WEAPON_PIPEBOMBLAUNCHER and 
+		input.IsButtonDown(StickySpammer.Key:GetValue()) then
 		if weapon:GetPropFloat("m_flChargeBeginTime") > 0 then
-			cmd:SetButtons(cmd:GetButtons() & ~IN_ATTACK) --detonateyy
+			cmd:SetButtons(cmd:GetButtons() & ~IN_ATTACK)
 		else
-			cmd:SetButtons(cmd:GetButtons() | IN_ATTACK) --detonateyy
+			cmd:SetButtons(cmd:GetButtons() | IN_ATTACK)
 		end
 	end
 end
