@@ -23,3 +23,4 @@ Hold down the key and stickies will fly, optionally set it to auto detonate them
 
 #### known problems:
 - Menulib doesn't update the keybind name on the UI when it's loaded from configs. Don't mind that, the keybind you save still works.
+- Menulib doesn't support mouse keybinds, please type them manually on the `stickyspam.lua`
