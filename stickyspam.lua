@@ -171,7 +171,6 @@ function StickySpammer.autoDetonate(cmd)
 	if gui.GetValue("aim sentry") == 1 then
 		for k, v in pairs(entities.FindByClass("CObjectSentrygun")) do
 			table.insert(players, v)
-			print("adding: "..tostring(v))
 		end
 	end
 
@@ -217,13 +216,6 @@ function StickySpammer.spam(cmd)
 	if not class or class ~= 4 then return end	
 	local weapon = me:GetPropEntity("m_hActiveWeapon")
 
-	--[[
-	if weapon and weapon:GetPropFloat("m_flChargeBeginTime") > 0 then
-		print(tostring(weapon:GetPropFloat("m_flChargeBeginTime")), tostring(globals.CurTime()))
-		print(string.format("things: %s", tostring((globals.CurTime() - weapon:GetPropFloat("m_flChargeBeginTime")) * 1000 )))
-
-	end
-	--]]
 	if StickySpammer.Key and StickySpammer.Key:GetValue() ~= KEY_NONE and
 		weapon and weapon:GetWeaponID() == TF_WEAPON_PIPEBOMBLAUNCHER and 
 		input.IsButtonDown(StickySpammer.Key:GetValue()) then
