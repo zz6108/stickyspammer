@@ -156,6 +156,8 @@ end
 function StickySpammer.autoDetonate(cmd)
 	local me = entities.GetLocalPlayer()
 	if not me or not me:IsAlive() then return end
+	local class = me:GetPropInt("m_iClass")
+	if not class or class ~= 4 then return end
 	if not StickySpammer.DoAutoDetonate.Value then return end
 
 
@@ -189,7 +191,8 @@ end
 function StickySpammer.spam(cmd)
 	local me = entities:GetLocalPlayer()
 	if not me or not me:IsAlive() then return end
-		
+	local class = me:GetPropInt("m_iClass")
+	if not class or class ~= 4 then return end	
 	local weapon = me:GetPropEntity("m_hActiveWeapon")
 	if StickySpammer.Key and StickySpammer.Key:GetValue() ~= KEY_NONE and
 		weapon and weapon:GetWeaponID() == TF_WEAPON_PIPEBOMBLAUNCHER and 
