@@ -18,3 +18,8 @@ Hold down the key and stickies will fly, optionally set it to auto detonate them
 3. copy the `stickyspammer.lua` into `%localappdata%`
 4. ??
 5. profit.
+
+
+
+#### known problems:
+- Menulib doesn't update the keybind name on the UI when it's loaded from configs. Don't mind that, the keybind you save still works.
