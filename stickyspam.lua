@@ -116,7 +116,6 @@ function StickySpammer.spam(cmd)
 	local me = entities:GetLocalPlayer()
 	if not me or not me:IsAlive() then return end
 		
-	print(tostring(MOUSE_4))
 	local weapon = me:GetPropEntity("m_hActiveWeapon")
 	if StickySpammer.Key:GetValue() ~= KEY_NONE and weapon and weapon:GetWeaponID() == TF_WEAPON_PIPEBOMBLAUNCHER and input.IsButtonDown(StickySpammer.Key:GetValue()) then
 		print(weapon:GetPropFloat("m_flChargeBeginTime"))
