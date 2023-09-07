@@ -82,7 +82,6 @@ end
 function StickySpammer.autoDetonate(cmd)
 	local me = entities.GetLocalPlayer()
 	if not me or not me:IsAlive() then return end
-	--print("Doautodetonate: "..tostring(StickySpammer.DoAutoDetonate))
 	if not StickySpammer.DoAutoDetonate.Value then return end
 
 
@@ -118,7 +117,6 @@ function StickySpammer.spam(cmd)
 		
 	local weapon = me:GetPropEntity("m_hActiveWeapon")
 	if StickySpammer.Key:GetValue() ~= KEY_NONE and weapon and weapon:GetWeaponID() == TF_WEAPON_PIPEBOMBLAUNCHER and input.IsButtonDown(StickySpammer.Key:GetValue()) then
-		print(weapon:GetPropFloat("m_flChargeBeginTime"))
 		if weapon:GetPropFloat("m_flChargeBeginTime") > 0 then
 			cmd:SetButtons(cmd:GetButtons() & ~IN_ATTACK) --detonateyy
 		else
