@@ -1,5 +1,7 @@
+StickySpammer = nil
 if not StickySpammer then
 	StickySpammer = {
+		configFolder = engine.GetGameDir() or os.getenv("localAPPDATA"),
 		Key = KEY_F,
 		Rage = true,
 		DoAutoDetonate = true,
@@ -7,7 +9,6 @@ if not StickySpammer then
 		Menu = nil
 	}
 end
-
 
 local err, Menu = pcall(require, "Menu")
 assert(err, "MenuLib 404")
@@ -20,13 +21,86 @@ StickySpammer.ExplosionDistance = StickySpammer.Menu:AddComponent(Menu.Slider("E
 StickySpammer.DoAutoDetonate = StickySpammer.Menu:AddComponent(Menu.Checkbox("Auto detonate", StickySpammer.DoAutoDetonate, ItemFlags.FullWidth))
 StickySpammer.Rage = StickySpammer.Menu:AddComponent(Menu.Checkbox("Rage (no visibility check)", StickySpammer.Rage, ItemFlags.FullWidth))
 StickySpammer.Key = StickySpammer.Menu:AddComponent(Menu.Keybind("keybind", StickySpammer.Key))
---StickySpammer.Menu:AddComponent(Menu.Button("save config", function() 
---	print("this doesn't exist, we cant write to disk apparently.")
---end))
+StickySpammer.Menu:AddComponent(Menu.Button("save config", function() 
+	StickySpammer.save()
+end))
 
 
 
 
+function StickySpammer.save()
+	local data = StickySpammer.serialize(StickySpammer)
+
+	local file = string.format("%s\\..\\StickySpammer.cfg", engine.GetGameDir())
+	local handle = io.open(file, "w")
+	if handle then
+		handle:write(data)
+		handle:close()
+		print(string.format("config saved to %s", file))
+	else
+		print(string.format("failed to write file? %s", file))
+	end
+	
+
+end
+
+function StickySpammer.load()
+	local file = string.format("%s\\..\\StickySpammer.cfg", engine.GetGameDir())
+	
+	local handle = io.open(file, "rb")
+	if handle then
+		local input = handle:read("*a")
+		for k, v in pairs(StickySpammer.deSerialize(input)) do
+			StickySpammer[k].Value = v
+		end
+		handle:close()
+
+		print("config loaded")
+	else
+		print(string.format("failed to load config, does it exist? (%s)", file))
+	end
+
+end
+
+
+
+function StickySpammer.deSerialize(input)
+	local t = {}
+	for k, v in string.gmatch(input, "([^&=]+)=([^&=]+)") do
+		if v == "true" then
+			t[k] = true
+		elseif v == "false" then
+			t[k] = false
+		elseif string.match(v, "^%d+%.%d+$") then
+			t[k] = tonumber(v)
+		else
+			t[k] = tonumber(v) or v
+		end
+	end
+	return t	
+end
+
+
+-- only serialize bool & int
+function StickySpammer.serialize(input)
+	local result = {}
+	for k, v in pairs(input) do
+		local valueStr
+		local _t = type(v)
+		if _t == "boolean" or _t == "number" or _t == "table" then
+			if v.Value or v.GetValue then
+				v = v:GetValue()
+				if type(v) == "boolean" then
+					valueStr = v and "true" or "false"
+				else
+					valueStr = tostring(v)
+				end
+				table.insert(result, string.format("%s=%s", k, valueStr))
+			end
+		end
+	end
+	return table.concat(result, "&")
+end
 
 -- copied LnxLib
 function StickySpammer.visible(target, player, nonplayer)
@@ -116,7 +190,7 @@ function StickySpammer.spam(cmd)
 	if not me or not me:IsAlive() then return end
 		
 	local weapon = me:GetPropEntity("m_hActiveWeapon")
-	if StickySpammer.Key:GetValue() ~= KEY_NONE and weapon and weapon:GetWeaponID() == TF_WEAPON_PIPEBOMBLAUNCHER and input.IsButtonDown(StickySpammer.Key:GetValue()) then
+	if StickySpammer.Key and StickySpammer.Key:GetValue() ~= KEY_NONE and weapon and weapon:GetWeaponID() == TF_WEAPON_PIPEBOMBLAUNCHER and input.IsButtonDown(StickySpammer.Key:GetValue()) then
 		if weapon:GetPropFloat("m_flChargeBeginTime") > 0 then
 			cmd:SetButtons(cmd:GetButtons() & ~IN_ATTACK) --detonateyy
 		else
@@ -134,6 +208,7 @@ local function unloadStickySpam()
 end
 
 
+StickySpammer.load()
 callbacks.Register("CreateMove", StickySpammer.autoDetonate)
 callbacks.Register("CreateMove", StickySpammer.spam)
 callbacks.Register("Unload", unloadStickySpam)
