@@ -6,10 +6,12 @@ if not StickySpammer then
 		Rage = true,
 		DoAutoDetonate = true,
 		ExplosionDistance = 160,
-		Menu = nil
+		Charge = 0.0,
+		Menu = nil,
 	}
 end
 
+local lastLaunch = nil
 local err, Menu = pcall(require, "Menu")
 assert(err, "MenuLib 404")
 assert(Menu.Version >= 1.5, "Get a newer version of menulib.")
@@ -17,6 +19,7 @@ assert(Menu.Version >= 1.5, "Get a newer version of menulib.")
 
 StickySpammer.Menu = Menu.Create("stickyspammer", MenuFlags.AutoSize)
 StickySpammer.ExplosionDistance = StickySpammer.Menu:AddComponent(Menu.Slider("Explosion distance", 10, 250, StickySpammer.ExplosionDistance))
+StickySpammer.Charge = StickySpammer.Menu:AddComponent(Menu.Slider("Charge stickies (ms)", 0, 10000, StickySpammer.Charge, ItemFlags.FullWidth))
 
 StickySpammer.DoAutoDetonate = StickySpammer.Menu:AddComponent(Menu.Checkbox("Auto detonate", StickySpammer.DoAutoDetonate, ItemFlags.FullWidth))
 StickySpammer.Rage = StickySpammer.Menu:AddComponent(Menu.Checkbox("Rage (no visibility check)", StickySpammer.Rage, ItemFlags.FullWidth))
@@ -164,18 +167,37 @@ function StickySpammer.autoDetonate(cmd)
 	local myBombs = StickySpammer.stickies(me)
 	local players = entities.FindByClass("CTFPlayer")
 
+
+	if gui.GetValue("aim sentry") == 1 then
+		for k, v in pairs(entities.FindByClass("CObjectSentrygun")) do
+			table.insert(players, v)
+			print("adding: "..tostring(v))
+		end
+	end
+
+
+	if gui.GetValue("aim other buildings") == 1 then
+		for k, v in pairs(entities.FindByClass("CObjectTeleporter")) do
+			table.insert(players, v)
+		end
+
+		for k, v in pairs(entities.FindByClass("CObjectDispenser")) do
+			table.insert(players, v)
+		end
+	end
+
 	if #myBombs < 1 or #players < 1 then return end
 
-
-
 	for _, player in pairs(players) do
-		if player and player:IsAlive() and player:GetTeamNumber() ~= me:GetTeamNumber() then -- verify that it's the enemy and alive..
-			if StickySpammer.Rage.Value or (StickySpammer.visible(player, me)) then -- rage / visibility check
-				if gui.GetValue("ignore cloaked") == 1 and not player:InCond(4) then -- spy cloak check
-					for _, bomb in pairs(myBombs) do
-						if (bomb:GetAbsOrigin() - player:GetAbsOrigin()):Length() < StickySpammer.ExplosionDistance.Value then -- check distance
-							if StickySpammer.visible(player, bomb, true) then -- ensure that sticky can actually affect the target..
-								cmd:SetButtons(cmd:GetButtons() | IN_ATTACK2) --detonatey
+		if player and (player:GetClass() ~= "CTFPlayer" or player:IsAlive()) then
+			if player:GetTeamNumber() ~= me:GetTeamNumber() then -- verify that it's the enemy and alive..
+				if StickySpammer.Rage.Value or (StickySpammer.visible(player, me)) then -- rage / visibility check
+					if gui.GetValue("ignore cloaked") == 1 and not player:InCond(4) then -- spy cloak check
+						for _, bomb in pairs(myBombs) do
+							if (bomb:GetAbsOrigin() - player:GetAbsOrigin()):Length() < StickySpammer.ExplosionDistance.Value then -- check distance
+								if StickySpammer.visible(player, bomb, true) then -- ensure that sticky can actually affect the target..
+									cmd:SetButtons(cmd:GetButtons() | IN_ATTACK2) --detonatey
+								end
 							end
 						end
 					end
@@ -194,14 +216,25 @@ function StickySpammer.spam(cmd)
 	local class = me:GetPropInt("m_iClass")
 	if not class or class ~= 4 then return end	
 	local weapon = me:GetPropEntity("m_hActiveWeapon")
+
+	--[[
+	if weapon and weapon:GetPropFloat("m_flChargeBeginTime") > 0 then
+		print(tostring(weapon:GetPropFloat("m_flChargeBeginTime")), tostring(globals.CurTime()))
+		print(string.format("things: %s", tostring((globals.CurTime() - weapon:GetPropFloat("m_flChargeBeginTime")) * 1000 )))
+
+	end
+	--]]
 	if StickySpammer.Key and StickySpammer.Key:GetValue() ~= KEY_NONE and
 		weapon and weapon:GetWeaponID() == TF_WEAPON_PIPEBOMBLAUNCHER and 
 		input.IsButtonDown(StickySpammer.Key:GetValue()) then
-		if weapon:GetPropFloat("m_flChargeBeginTime") > 0 then
+		local prop = weapon:GetPropFloat("m_flChargeBeginTime")
+		if lastLaunch ~= prop and ((globals.CurTime() - prop) * 1000) > (StickySpammer.Charge.Value) then
 			cmd:SetButtons(cmd:GetButtons() & ~IN_ATTACK)
+			lastLaunch = prop
 		else
 			cmd:SetButtons(cmd:GetButtons() | IN_ATTACK)
 		end
+
 	end
 end
 
