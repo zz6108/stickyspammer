@@ -189,7 +189,7 @@ function StickySpammer.autoDetonate(cmd)
 
 	for _, player in pairs(players) do
 		if player and (player:GetClass() ~= "CTFPlayer" or player:IsAlive()) then
-			if player:GetTeamNumber() ~= me:GetTeamNumber() then -- verify that it's the enemy and alive..
+			if player:GetTeamNumber() ~= me:GetTeamNumber() and not StickySpammer.IsUbering(player) then -- verify that it's the enemy and alive..
 				if StickySpammer.Rage.Value or (StickySpammer.visible(player, me)) then -- rage / visibility check
 					if gui.GetValue("ignore cloaked") == 1 and not player:InCond(4) then -- spy cloak check
 						for _, bomb in pairs(myBombs) do
@@ -208,6 +208,14 @@ function StickySpammer.autoDetonate(cmd)
 
 end
 
+function StickySpammer.IsUbering(entity)
+	local weapon = entity:GetPropEntity("m_hActiveWeapon")
+	if weapon and weapon:GetWeaponID() == TF_WEAPON_MEDIGUN and weapon:GetPropBool("m_bChargeRelease") then
+		return true
+	end
+
+	return false
+end
 
 function StickySpammer.spam(cmd)
 	local me = entities:GetLocalPlayer()
