@@ -5,6 +5,13 @@ Hold down the key and stickies will fly, optionally set it to auto detonate them
 
 ![UI.png](pictures/UI.png)
 
+# Features
+* simple In-game UI.
+* Auto detonate stickies
+* Configurable explosion distance
+* Rage mode (disables visibility checks)
+* Configurable charge duration for launching stickies
+* Supports "ignore cloaked", "aim sentry", and "aim other buildings" from default aimbot.
 
 # Requirements
 * LMAOBOX beta with LUA support.
@@ -21,6 +28,9 @@ Hold down the key and stickies will fly, optionally set it to auto detonate them
 
 # notes
 - Supports the default aimbot "ignore cloaked", "aim sentry", "aim other buildings" flags. Enable those in the normal aimbot menu and the autodetonation will detonate the stickies near those as well.
+
+
+
 
 #### known problems:
 - Menulib doesn't update the keybind name on the UI when it's loaded from configs. Don't mind that, the keybind you save still works.
